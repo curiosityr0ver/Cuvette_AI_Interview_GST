@@ -14,10 +14,7 @@ const questions = [
 createRoot(document.getElementById("root")).render(
 	<BrowserRouter>
 		<Routes>
-			<Route
-				path="/questionnaire"
-				element={<Questionnaire questions={questions} />}
-			/>
+			<Route path="/" element={<Questionnaire questions={questions} />} />
 		</Routes>
 	</BrowserRouter>
 );
