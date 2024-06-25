@@ -32,7 +32,6 @@ app.get('/', (req, res) => {
 
 app.use('/intro', userRoute);
 app.use('/quiz', quizRoute);
-app.use('/sample', sampleRoute);
 app.post('/cloud', upload.single('audio'), transcribeAudio);
 
 
