@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import ResultsPage from "./ResultsPage";
 import questionsArray from "../data/questions";
 import { transcribeAudio } from "../api/cloudApi";
@@ -10,15 +10,11 @@ const Questionnaire = () => {
 	const [transcriptions, setTranscriptions] = useState(
 		Array(questionsArray.length).fill("")
 	);
-	const [audioURLs, setAudioURLs] = useState(
-		Array(questionsArray.length).fill("")
-	);
-	const [showResults, setShowResults] = useState(false);
-	const [startTime, setStartTime] = useState(Date.now());
 	const [timeSpent, setTimeSpent] = useState(
 		Array(questionsArray.length).fill(0)
 	);
-
+	const [showResults, setShowResults] = useState(false);
+	const [loading, setLoading] = useState(false); // Loading state for transcription
 	const mediaRecorderRef = useRef(null);
 	const audioChunksRef = useRef([]);
 	const audioContextRef = useRef(null);
@@ -50,29 +46,32 @@ const Questionnaire = () => {
 			const audioBlob = new Blob(audioChunksRef.current, {
 				type: "audio/webm",
 			});
-			const audioURL = URL.createObjectURL(audioBlob);
 
 			const formData = new FormData();
 			formData.append("audio", audioBlob, "audio.webm");
 
 			try {
+				setLoading(true); // Set loading state before transcription
 				const data = await transcribeAudio(formData);
 				const updatedTranscriptions = [...transcriptions];
 				updatedTranscriptions[currentQuestionIndex] = data.transcript;
 				setTranscriptions(updatedTranscriptions);
 
-				const updatedAudioURLs = [...audioURLs];
-				updatedAudioURLs[currentQuestionIndex] = audioURL;
-				setAudioURLs(updatedAudioURLs);
-
-				setRecording(false);
+				const newTimeSpent = [...timeSpent];
+				newTimeSpent[currentQuestionIndex] += new Date() - startTimeRef.current;
+				setTimeSpent(newTimeSpent);
 			} catch (error) {
 				console.error("Error during transcription:", error);
+			} finally {
+				setLoading(false); // Reset loading state after transcription
+				setRecording(false);
 			}
 		};
 
 		mediaRecorderRef.current.start();
 		setRecording(true);
+
+		startTimeRef.current = new Date();
 	};
 
 	const stopRecording = () => {
@@ -81,18 +80,9 @@ const Questionnaire = () => {
 	};
 
 	const nextQuestion = () => {
-		const endTime = Date.now();
-		const timeSpentOnCurrentQuestion = endTime - startTime;
-
-		const updatedTimeSpent = [...timeSpent];
-		updatedTimeSpent[currentQuestionIndex] += timeSpentOnCurrentQuestion;
-		setTimeSpent(updatedTimeSpent);
-
 		if (currentQuestionIndex + 1 < questionsArray.length) {
-			setCurrentQuestionIndex(currentQuestionIndex + 1);
-			setStartTime(Date.now());
+			setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
 		} else {
-			console.log("Time spent on each question:", updatedTimeSpent);
 			setShowResults(true);
 		}
 	};
@@ -102,31 +92,20 @@ const Questionnaire = () => {
 	};
 
 	const skipQuestion = () => {
-		const endTime = Date.now();
-		const timeSpentOnCurrentQuestion = endTime - startTime;
-
-		const updatedTimeSpent = [...timeSpent];
-		updatedTimeSpent[currentQuestionIndex] += timeSpentOnCurrentQuestion;
-		setTimeSpent(updatedTimeSpent);
-
 		const updatedTranscriptions = [...transcriptions];
 		updatedTranscriptions[currentQuestionIndex] = "Skipped";
 		setTranscriptions(updatedTranscriptions);
-		setAudioURLs(audioURLs);
 
 		nextQuestion();
 	};
 
-	useEffect(() => {
-		setStartTime(Date.now());
-	}, [currentQuestionIndex]);
+	const startTimeRef = useRef(null);
 
 	if (showResults) {
 		return (
 			<ResultsPage
 				questions={questionsArray}
 				transcriptions={transcriptions}
-				audioURLs={audioURLs}
 				timeSpent={timeSpent}
 			/>
 		);
@@ -137,51 +116,34 @@ const Questionnaire = () => {
 			<h3 className={styles.question}>
 				Question {currentQuestionIndex + 1}:{" "}
 				{questionsArray[currentQuestionIndex]}
-				{recording && <span className={styles.recordingIndicator}></span>}
 			</h3>
 			<button
-				className={styles.button}
 				onClick={recording ? stopRecording : startRecording}
+				disabled={loading}
 			>
 				{recording ? "Stop Recording" : "Start Recording"}
 			</button>
-			{audioURLs[currentQuestionIndex] && (
-				<div className={styles.audioContainer}>
-					<h4>Recorded Audio:</h4>
-					<audio
-						className={styles.audio}
-						controls
-						src={audioURLs[currentQuestionIndex]}
-					></audio>
-				</div>
-			)}
+			{loading && <p className={styles.loadingIndicator}>Transcribing...</p>}
 			{transcriptions[currentQuestionIndex] &&
 				transcriptions[currentQuestionIndex] !== "Skipped" && (
-					<div className={styles.transcription}>
+					<div>
 						<h4>Transcription:</h4>
 						<p>{transcriptions[currentQuestionIndex]}</p>
 					</div>
 				)}
-			<div className={styles.controls}>
-				<button
-					className={styles.button}
-					onClick={reRecord}
-					disabled={recording}
-				>
+			<div className={styles.buttons}>
+				<button onClick={reRecord} disabled={recording || loading}>
 					Re-record
 				</button>
 				<button
-					className={styles.button}
 					onClick={nextQuestion}
-					disabled={recording || !transcriptions[currentQuestionIndex]}
+					disabled={
+						recording || !transcriptions[currentQuestionIndex] || loading
+					}
 				>
 					Next Question
 				</button>
-				<button
-					className={styles.button}
-					onClick={skipQuestion}
-					disabled={recording}
-				>
+				<button onClick={skipQuestion} disabled={recording || loading}>
 					Skip
 				</button>
 			</div>

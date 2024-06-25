@@ -5,6 +5,7 @@ import { sendResults } from "../api/quizApi";
 
 const ResultsPage = ({ questions, transcriptions, timeSpent }) => {
 	const [feedback, setFeedback] = useState([]);
+	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
 		const questionAnswerPairs = questions.map((question, index) => ({
@@ -17,9 +18,13 @@ const ResultsPage = ({ questions, transcriptions, timeSpent }) => {
 			try {
 				const response = await sendResults(questionAnswerPairs);
 				console.log("Results sent successfully:", response);
-				setFeedback(response.data);
+				if (response.status === 200) {
+					setFeedback(response.data);
+				}
 			} catch (error) {
 				console.error("Error sending results:", error);
+			} finally {
+				setLoading(false);
 			}
 		};
 
@@ -45,6 +50,10 @@ const ResultsPage = ({ questions, transcriptions, timeSpent }) => {
 			return styles.poorRating;
 		}
 	};
+
+	if (loading) {
+		return <div className={styles.loading}>Loading...</div>;
+	}
 
 	return (
 		<div className={styles.container}>

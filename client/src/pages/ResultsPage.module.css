@@ -71,3 +71,11 @@ strong {
     font-weight: 600;
     color: #333333;
 }
+
+.loading {
+    font-size: 18px;
+    font-weight: 500;
+    color: #666666;
+    text-align: center;
+    padding: 20px;
+}
