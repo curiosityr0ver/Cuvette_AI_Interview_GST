@@ -3,12 +3,9 @@ const cors = require('cors');
 require('dotenv').config();
 const path = require("path");
 const multer = require('multer');
-const fs = require('fs');
 const userRoute = require('./controllers/userRoute');
 const quizRoute = require('./controllers/quizRoute');
-const sampleRoute = require('./controllers/sampleRoute');
 const { transcribeAudio } = require('./controllers/cloudController');
-const { handleAudioSubmission } = require('./controllers/audioController');
 const mongoose = require('mongoose');
 
 const app = express();
@@ -36,7 +33,6 @@ app.post('/cloud', upload.single('audio'), transcribeAudio);
 
 
 app.use(express.static(path.join(__dirname, 'public')));
-
 // Serve React application for any routes not handled by the above routes
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
