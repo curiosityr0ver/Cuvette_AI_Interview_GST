@@ -2,18 +2,13 @@ const express = require("express");
 const cors = require('cors');
 require('dotenv').config();
 const path = require("path");
-const multer = require('multer');
 const userRoute = require('./controllers/userRoute');
 const quizRoute = require('./controllers/quizRoute');
-const { transcribeAudio } = require('./controllers/cloudController');
+const { transcribeAudioHandler, upload } = require('./controllers/transcribeController');
 const mongoose = require('mongoose');
 
 const app = express();
 const port = process.env.PORT || 3000;
-
-
-// Set up multer for file uploads
-const upload = multer({ dest: 'uploads/' });
 
 mongoose.connect(process.env.MONGO_URI);
 
@@ -29,7 +24,8 @@ app.get('/', (req, res) => {
 
 app.use('/intro', userRoute);
 app.use('/quiz', quizRoute);
-app.post('/cloud', upload.single('audio'), transcribeAudio);
+app.post('/cloud', upload.single('audio'), transcribeAudioHandler);
+
 
 
 app.use(express.static(path.join(__dirname, 'public')));

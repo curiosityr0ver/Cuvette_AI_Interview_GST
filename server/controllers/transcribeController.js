@@ -1,5 +1,5 @@
 const { SpeechClient } = require('@google-cloud/speech');
-const fs = require('fs');
+const multer = require('multer');
 
 const credentials = {
     type: process.env.GC_TYPE,
@@ -18,22 +18,23 @@ const credentials = {
 // Initialize the Google Speech client
 const speechClient = new SpeechClient({ credentials });
 
-const transcribeAudio = async (req, res) => {
-    console.log("Transcribing audio...");
-    const filePath = req.file.path;
+const upload = multer({ storage: multer.memoryStorage() });
 
-    const audioBytes = fs.readFileSync(filePath).toString('base64');
 
-    const request = {
-        audio: { content: audioBytes },
-        config: {
-            encoding: 'WEBM_OPUS',
-            sampleRateHertz: 48000,  // Set to 48000 to match the WEBM OPUS header
-            languageCode: 'en-IN',
-        },
-    };
-
+const transcribeAudioHandler = async (req, res) => {
     try {
+        const audioBuffer = req.file.buffer;
+        const audioBytes = audioBuffer.toString('base64');
+
+        const request = {
+            audio: { content: audioBytes },
+            config: {
+                encoding: 'WEBM_OPUS',
+                sampleRateHertz: 48000,
+                languageCode: 'en-US',
+            },
+        };
+
         const [response] = await speechClient.recognize(request);
         const transcription = response.results
             .map(result => result.alternatives[0].transcript)
@@ -42,12 +43,11 @@ const transcribeAudio = async (req, res) => {
         res.json({ transcript: transcription });
     } catch (error) {
         console.error('Error during transcription:', error);
-        res.status(500).send(error);
-    } finally {
-        fs.unlinkSync(filePath);
+        res.status(500).send('Error during transcription');
     }
 };
 
 module.exports = {
-    transcribeAudio
+    transcribeAudioHandler,
+    upload
 };
