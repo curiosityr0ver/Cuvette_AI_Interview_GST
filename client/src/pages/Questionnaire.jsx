@@ -1,9 +1,10 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import ResultsPage from "./ResultsPage";
 import questionsArray from "../data/questions";
 import { transcribeAudio } from "../api/cloudApi";
+import styles from "./Questionnaire.module.css";
 
-const SpeechToText = () => {
+const Questionnaire = () => {
 	const [recording, setRecording] = useState(false);
 	const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 	const [transcriptions, setTranscriptions] = useState(
@@ -13,6 +14,11 @@ const SpeechToText = () => {
 		Array(questionsArray.length).fill("")
 	);
 	const [showResults, setShowResults] = useState(false);
+	const [startTime, setStartTime] = useState(Date.now());
+	const [timeSpent, setTimeSpent] = useState(
+		Array(questionsArray.length).fill(0)
+	);
+
 	const mediaRecorderRef = useRef(null);
 	const audioChunksRef = useRef([]);
 	const audioContextRef = useRef(null);
@@ -75,9 +81,18 @@ const SpeechToText = () => {
 	};
 
 	const nextQuestion = () => {
+		const endTime = Date.now();
+		const timeSpentOnCurrentQuestion = endTime - startTime;
+
+		const updatedTimeSpent = [...timeSpent];
+		updatedTimeSpent[currentQuestionIndex] += timeSpentOnCurrentQuestion;
+		setTimeSpent(updatedTimeSpent);
+
 		if (currentQuestionIndex + 1 < questionsArray.length) {
 			setCurrentQuestionIndex(currentQuestionIndex + 1);
+			setStartTime(Date.now());
 		} else {
+			console.log("Time spent on each question:", updatedTimeSpent);
 			setShowResults(true);
 		}
 	};
@@ -87,6 +102,13 @@ const SpeechToText = () => {
 	};
 
 	const skipQuestion = () => {
+		const endTime = Date.now();
+		const timeSpentOnCurrentQuestion = endTime - startTime;
+
+		const updatedTimeSpent = [...timeSpent];
+		updatedTimeSpent[currentQuestionIndex] += timeSpentOnCurrentQuestion;
+		setTimeSpent(updatedTimeSpent);
+
 		const updatedTranscriptions = [...transcriptions];
 		updatedTranscriptions[currentQuestionIndex] = "Skipped";
 		setTranscriptions(updatedTranscriptions);
@@ -95,49 +117,71 @@ const SpeechToText = () => {
 		nextQuestion();
 	};
 
+	useEffect(() => {
+		setStartTime(Date.now());
+	}, [currentQuestionIndex]);
+
 	if (showResults) {
 		return (
 			<ResultsPage
 				questions={questionsArray}
 				transcriptions={transcriptions}
 				audioURLs={audioURLs}
+				timeSpent={timeSpent}
 			/>
 		);
 	}
 
 	return (
-		<div>
-			<h3>
+		<div className={styles.container}>
+			<h3 className={styles.question}>
 				Question {currentQuestionIndex + 1}:{" "}
 				{questionsArray[currentQuestionIndex]}
+				{recording && <span className={styles.recordingIndicator}></span>}
 			</h3>
-			<button onClick={recording ? stopRecording : startRecording}>
+			<button
+				className={styles.button}
+				onClick={recording ? stopRecording : startRecording}
+			>
 				{recording ? "Stop Recording" : "Start Recording"}
 			</button>
 			{audioURLs[currentQuestionIndex] && (
-				<div>
+				<div className={styles.audioContainer}>
 					<h4>Recorded Audio:</h4>
-					<audio controls src={audioURLs[currentQuestionIndex]}></audio>
+					<audio
+						className={styles.audio}
+						controls
+						src={audioURLs[currentQuestionIndex]}
+					></audio>
 				</div>
 			)}
 			{transcriptions[currentQuestionIndex] &&
 				transcriptions[currentQuestionIndex] !== "Skipped" && (
-					<div>
+					<div className={styles.transcription}>
 						<h4>Transcription:</h4>
 						<p>{transcriptions[currentQuestionIndex]}</p>
 					</div>
 				)}
-			<div>
-				<button onClick={reRecord} disabled={recording}>
+			<div className={styles.controls}>
+				<button
+					className={styles.button}
+					onClick={reRecord}
+					disabled={recording}
+				>
 					Re-record
 				</button>
 				<button
+					className={styles.button}
 					onClick={nextQuestion}
 					disabled={recording || !transcriptions[currentQuestionIndex]}
 				>
 					Next Question
 				</button>
-				<button onClick={skipQuestion} disabled={recording}>
+				<button
+					className={styles.button}
+					onClick={skipQuestion}
+					disabled={recording}
+				>
 					Skip
 				</button>
 			</div>
@@ -145,4 +189,4 @@ const SpeechToText = () => {
 	);
 };
 
-export default SpeechToText;
+export default Questionnaire;

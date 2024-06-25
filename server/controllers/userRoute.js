@@ -24,21 +24,13 @@ router.post('/', upload.single('resume'), async (req, res) => {
         if (!linkedin && !req.file.buffer) {
             throw new Error('Please provide either LinkedIn or resume');
         }
-        let technologies;
+        let technologies = [];
         // return console.log(email, phone, fullName, linkedin);
 
         if (dataBuffer) {
             const data = await pdfParse(dataBuffer);
             const text = data.text;
-            const response = await generateContent(prompt, text);
-            technologies = response.response.text();
-            let start;
-            let end;
-            for (let i = 0; i < technologies.length; i++) {
-                if (technologies[i] == '[') start = i + 1;
-                if (technologies[i] == ']') end = i;
-            }
-            technologies = technologies.substring(start, end);
+            technologies = await generateContent(prompt, text);
         }
 
         const user = new User({

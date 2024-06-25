@@ -1,11 +1,13 @@
+import axios from 'axios';
+
 export const transcribeAudio = async (formData) => {
     try {
-        const response = await fetch('http://localhost:3000/cloud', {
-            method: 'POST',
-            body: formData,
+        const response = await axios.post('/cloud', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
         });
-        const data = await response.json();
-        return data;
+        return response.data;
     } catch (error) {
         console.error('Error transcribing audio:', error);
         throw error;

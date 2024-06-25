@@ -22,7 +22,6 @@ app.post('/cloud', upload.single('audio'), transcribeAudioHandler);
 
 
 app.use(express.static(path.join(__dirname, 'public')));
-// Serve React application for any routes not handled by the above routes
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });

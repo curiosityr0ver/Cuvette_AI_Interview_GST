@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./index.css";
 import Questionnaire from "./pages/Questionnaire";
+import LandingPage from "./pages/LandingPage";
 
 const questions = [
 	{ id: 1, text: "Question 1" },
@@ -14,7 +15,8 @@ const questions = [
 createRoot(document.getElementById("root")).render(
 	<BrowserRouter>
 		<Routes>
-			<Route path="/" element={<Questionnaire questions={questions} />} />
+			<Route path="/" element={<LandingPage />} />
+			<Route path="/quiz" element={<Questionnaire questions={questions} />} />
 		</Routes>
 	</BrowserRouter>
 );
