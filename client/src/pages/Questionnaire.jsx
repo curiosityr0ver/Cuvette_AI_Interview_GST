@@ -123,14 +123,8 @@ const Questionnaire = () => {
 			>
 				{recording ? "Stop Recording" : "Start Recording"}
 			</button>
+			{recording && <div className={styles.recordingIndicator}></div>}
 			{loading && <p className={styles.loadingIndicator}>Transcribing...</p>}
-			{transcriptions[currentQuestionIndex] &&
-				transcriptions[currentQuestionIndex] !== "Skipped" && (
-					<div>
-						<h4>Transcription:</h4>
-						<p>{transcriptions[currentQuestionIndex]}</p>
-					</div>
-				)}
 			<div className={styles.buttons}>
 				<button onClick={reRecord} disabled={recording || loading}>
 					Re-record
@@ -143,7 +137,12 @@ const Questionnaire = () => {
 				>
 					Next Question
 				</button>
-				<button onClick={skipQuestion} disabled={recording || loading}>
+				<button
+					onClick={skipQuestion}
+					disabled={
+						recording || loading || transcriptions[currentQuestionIndex]
+					}
+				>
 					Skip
 				</button>
 			</div>

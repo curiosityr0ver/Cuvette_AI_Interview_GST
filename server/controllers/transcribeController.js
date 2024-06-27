@@ -31,7 +31,7 @@ const transcribeAudioHandler = async (req, res) => {
             config: {
                 encoding: 'WEBM_OPUS',
                 sampleRateHertz: 48000,
-                languageCode: 'en-IN',
+                languageCode: 'en-US',
             },
         };
 
