@@ -12,10 +12,13 @@
   "dependencies": {
     "axios": "^1.7.2",
     "react": "^18.2.0",
+    "react-audio-recorder": "^2.2.0",
     "react-dom": "^18.2.0",
+    "react-mic": "^12.4.6",
     "react-router-dom": "^6.23.1",
     "recorder-js": "^1.0.7",
-    "wavefile": "^11.0.0"
+    "wavefile": "^11.0.0",
+    "wavesurfer.js": "^7.8.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",

@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import ResultsPage from "./ResultsPage";
 import questionsArray from "../data/questions";
 import { transcribeAudio } from "../api/cloudApi";
+import { ReactMic } from "react-mic";
 import styles from "./Questionnaire.module.css";
 
 const Questionnaire = () => {
@@ -15,67 +16,40 @@ const Questionnaire = () => {
 	);
 	const [showResults, setShowResults] = useState(false);
 	const [loading, setLoading] = useState(false); // Loading state for transcription
-	const mediaRecorderRef = useRef(null);
 	const audioChunksRef = useRef([]);
-	const audioContextRef = useRef(null);
+	const startTimeRef = useRef(null);
 
-	const handleUserGesture = async () => {
-		if (!audioContextRef.current) {
-			audioContextRef.current = new (window.AudioContext ||
-				window.webkitAudioContext)();
-		}
+	const onStop = async (recordedBlob) => {
+		audioChunksRef.current = recordedBlob.blob;
+		setRecording(false);
 
-		if (audioContextRef.current.state === "suspended") {
-			await audioContextRef.current.resume();
+		const formData = new FormData();
+		formData.append("audio", recordedBlob.blob, "audio.webm");
+
+		try {
+			setLoading(true); // Set loading state before transcription
+			const data = await transcribeAudio(formData);
+			const updatedTranscriptions = [...transcriptions];
+			updatedTranscriptions[currentQuestionIndex] = data.transcript;
+			setTranscriptions(updatedTranscriptions);
+
+			const newTimeSpent = [...timeSpent];
+			newTimeSpent[currentQuestionIndex] += new Date() - startTimeRef.current;
+			setTimeSpent(newTimeSpent);
+		} catch (error) {
+			console.error("Error during transcription:", error);
+		} finally {
+			setLoading(false); // Reset loading state after transcription
 		}
 	};
 
-	const startRecording = async () => {
-		await handleUserGesture();
-		const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-		mediaRecorderRef.current = new MediaRecorder(stream, {
-			mimeType: "audio/webm",
-		});
+	const startRecording = () => {
 		audioChunksRef.current = [];
-
-		mediaRecorderRef.current.ondataavailable = (event) => {
-			audioChunksRef.current.push(event.data);
-		};
-
-		mediaRecorderRef.current.onstop = async () => {
-			const audioBlob = new Blob(audioChunksRef.current, {
-				type: "audio/webm",
-			});
-
-			const formData = new FormData();
-			formData.append("audio", audioBlob, "audio.webm");
-
-			try {
-				setLoading(true); // Set loading state before transcription
-				const data = await transcribeAudio(formData);
-				const updatedTranscriptions = [...transcriptions];
-				updatedTranscriptions[currentQuestionIndex] = data.transcript;
-				setTranscriptions(updatedTranscriptions);
-
-				const newTimeSpent = [...timeSpent];
-				newTimeSpent[currentQuestionIndex] += new Date() - startTimeRef.current;
-				setTimeSpent(newTimeSpent);
-			} catch (error) {
-				console.error("Error during transcription:", error);
-			} finally {
-				setLoading(false); // Reset loading state after transcription
-				setRecording(false);
-			}
-		};
-
-		mediaRecorderRef.current.start();
 		setRecording(true);
-
 		startTimeRef.current = new Date();
 	};
 
 	const stopRecording = () => {
-		mediaRecorderRef.current.stop();
 		setRecording(false);
 	};
 
@@ -99,8 +73,6 @@ const Questionnaire = () => {
 		nextQuestion();
 	};
 
-	const startTimeRef = useRef(null);
-
 	if (showResults) {
 		return (
 			<ResultsPage
@@ -117,13 +89,19 @@ const Questionnaire = () => {
 				Question {currentQuestionIndex + 1}:{" "}
 				{questionsArray[currentQuestionIndex]}
 			</h3>
+			<ReactMic
+				record={recording}
+				className={styles.waveform}
+				onStop={onStop}
+				strokeColor="#007bff"
+				backgroundColor="#f7f9fc"
+			/>
 			<button
 				onClick={recording ? stopRecording : startRecording}
 				disabled={loading}
 			>
 				{recording ? "Stop Recording" : "Start Recording"}
 			</button>
-			{recording && <div className={styles.recordingIndicator}></div>}
 			{loading && <p className={styles.loadingIndicator}>Transcribing...</p>}
 			<div className={styles.buttons}>
 				<button onClick={reRecord} disabled={recording || loading}>

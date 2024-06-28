@@ -41,17 +41,8 @@ button:not(:disabled):hover {
 
 .loadingIndicator {
     margin-top: 20px;
-    font-size: 1.2em;
-    color: #ff9900;
-}
-
-.recordingIndicator {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background-color: red;
-    animation: blink 1s infinite;
-    margin-top: 10px;
+    font-size: 0.8em;
+    color: gray;
 }
 
 @keyframes blink {
@@ -64,4 +55,10 @@ button:not(:disabled):hover {
     50% {
         opacity: 0;
     }
+}
+
+.waveform {
+    width: 100%;
+    height: 200px;
+    margin-bottom: 20px;
 }
