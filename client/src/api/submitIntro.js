@@ -1,9 +1,9 @@
 import axios from 'axios';
 
 const submitIntro = async (formData) => {
-
+    const SERVER_ORIGIN = import.meta.env.VITE_API_BASE_URL || '';
     try {
-        const response = await axios.post(`/intro`, formData, {
+        const response = await axios.post(`${SERVER_ORIGIN}/intro`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },

@@ -1,0 +1,98 @@
+.container {
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 600px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background-color: #F5F5F7;
+}
+
+.header {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+    color: #1C1C1E;
+}
+
+.timerContainer {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin: 20px 0;
+}
+
+.transcriptContainer {
+    margin-top: 20px;
+}
+
+.buttonContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mainButton {
+    width: 100%;
+    padding: 10px;
+    background-color: #007AFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.mainButton:hover {
+    background-color: #005BB5;
+}
+
+.secondaryButtons {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.skipButton,
+.nextButton {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.skipButton {
+    background-color: #FF6969;
+    color: white;
+}
+
+.skipButton:hover {
+    background-color: #FF4C4C;
+}
+
+.nextButton {
+    background-color: #1679AB;
+    color: white;
+}
+
+.nextButton:hover {
+    background-color: #125E83;
+}
+
+.button:disabled,
+.skipButton:disabled,
+.nextButton:disabled {
+    background-color: #B0B0B0;
+    cursor: not-allowed;
+}
+
+.soundWave {
+    margin: 20px 0;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    border-radius: 5px;
+}
