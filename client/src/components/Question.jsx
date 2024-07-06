@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useState, useEffect, useRef } from "react";
 import { ReactMic } from "react-mic";
 import { transcribeAudio } from "../api/cloudApi";
@@ -8,7 +9,6 @@ const Question = ({ question, onNext, onSkip }) => {
 	const [recording, setRecording] = useState(false);
 	const [audioBlob, setAudioBlob] = useState(null);
 	const [transcript, setTranscript] = useState("");
-	const [startTime, setStartTime] = useState(new Date());
 	const [elapsedTime, setElapsedTime] = useState(0);
 	const [recordingDuration, setRecordingDuration] = useState(0);
 	const [recordedOnce, setRecordedOnce] = useState(false);
