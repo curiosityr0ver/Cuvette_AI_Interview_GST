@@ -1,11 +1,10 @@
-/* eslint-disable react/prop-types */
 import { useState, useEffect, useRef } from "react";
 import { ReactMic } from "react-mic";
-import { transcribeAudio } from "../api/cloudApi";
+import { transcribeAudio } from "../api/cloudApi"; // Ensure you have this API function
 import styles from "./Question.module.css";
 import spinnerStyles from "./Spinner.module.css";
 
-const Question = ({ question, onNext, onSkip }) => {
+const Question = ({ question, onNext, onSkipAll }) => {
 	const [recording, setRecording] = useState(false);
 	const [audioBlob, setAudioBlob] = useState(null);
 	const [transcript, setTranscript] = useState("");
@@ -70,10 +69,13 @@ const Question = ({ question, onNext, onSkip }) => {
 		}
 	};
 
-	const formatTime = (seconds) => {
-		const minutes = Math.floor(seconds / 60);
-		const remainingSeconds = seconds % 60;
-		return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
+	const handleNext = () => {
+		onNext({
+			question,
+			transcript: audioBlob ? transcript : "Skipped",
+			elapsedTime,
+			recordingDuration,
+		});
 	};
 
 	return (
@@ -86,10 +88,6 @@ const Question = ({ question, onNext, onSkip }) => {
 				strokeColor="#1C1C1E"
 				backgroundColor="#007AFF"
 			/>
-			<div className={styles.timerContainer}>
-				<p>Time taken to answer: {formatTime(elapsedTime)}</p>
-				<p>Recording duration: {formatTime(recordingDuration)}</p>
-			</div>
 			<div className={styles.buttonContainer}>
 				<button
 					onClick={toggleRecording}
@@ -104,20 +102,14 @@ const Question = ({ question, onNext, onSkip }) => {
 				</button>
 				<div className={styles.secondaryButtons}>
 					<button
-						onClick={onSkip}
-						disabled={recording || loading || audioBlob}
-						className={styles.skipButton}
-					>
-						Skip Question
-					</button>
-					<button
-						onClick={() =>
-							onNext({ question, transcript, elapsedTime, recordingDuration })
-						}
-						disabled={recording || loading || !audioBlob}
+						onClick={handleNext}
+						disabled={recording || loading}
 						className={styles.nextButton}
 					>
-						Next Question
+						{audioBlob ? "Next" : "Skip"}
+					</button>
+					<button onClick={onSkipAll} className={styles.skipAllButton}>
+						Skip All
 					</button>
 				</div>
 			</div>

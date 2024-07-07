@@ -3,7 +3,11 @@ import styles from "./ResultPage.module.css";
 
 const ResultPage = () => {
 	const location = useLocation();
-	const { results, feedback } = location.state || { results: [], feedback: [] };
+	const { results, feedback, totalTime } = location.state || {
+		results: [],
+		feedback: [],
+		totalTime: 0,
+	};
 
 	const getRatingClass = (rating) => {
 		if (rating <= 3) return styles.ratingLow;
@@ -14,6 +18,9 @@ const ResultPage = () => {
 	return (
 		<div className={styles.container}>
 			<h1 className={styles.header}>Quiz Results</h1>
+			<p>
+				<strong>Total Time Taken:</strong> {formatTime(totalTime)}
+			</p>
 			{results.length > 0 ? (
 				results.map((result, index) => (
 					<div key={index} className={styles.resultItem}>

@@ -1,15 +1,69 @@
 .container {
-    text-align: center;
     padding: 20px;
-    background-color: #F5F5F7;
+    margin: 20px auto;
+    max-width: 800px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background-color: #FFF;
 }
 
 .header {
     font-size: 2em;
     margin-bottom: 20px;
-    color: #1C1C1E;
+    text-align: center;
 }
 
-.spinner {
-    margin: 50px auto;
+.timer {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.timeline {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.timelineItem {
+    width: 20px;
+    height: 20px;
+    margin: 0 5px;
+    border-radius: 50%;
+    background-color: #FFFFFF;
+    border: 1px solid #ccc;
+}
+
+.answered {
+    background-color: #34C759;
+    /* Green for answered */
+}
+
+.skipped {
+    background-color: #FFCC00;
+    /* Yellow for skipped */
+}
+
+.unvisited {
+    background-color: #FFFFFF;
+    /* White for unvisited */
+}
+
+.skipAllButton {
+    width: 100%;
+    padding: 10px;
+    background-color: #FF3B30;
+    /* Red for emphasis */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 20px;
+}
+
+.skipAllButton:hover {
+    background-color: #D32F2F;
 }
