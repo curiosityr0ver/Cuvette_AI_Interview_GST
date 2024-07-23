@@ -9,7 +9,7 @@ import Result from "./pages/ResultPage";
 createRoot(document.getElementById("root")).render(
 	<BrowserRouter>
 		<Routes>
-			<Route path="/" element={<Questionnaire />} />
+			<Route path="/" element={<LandingPage />} />
 			<Route path="/quiz" element={<Questionnaire />} />
 			<Route path="/result" element={<Result />} />
 			<Route path="*" element={<h1>Not Found</h1>} />

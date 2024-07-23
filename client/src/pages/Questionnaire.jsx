@@ -46,8 +46,8 @@ const Questionnaire = () => {
 			setLoading(true);
 			try {
 				const response = await sendResults(results);
-				console.log("Quiz submission response:", response);
 
+				console.log("Quiz submission response:", response);
 				// Navigate to the Result page with answers, feedback, and total time
 				navigate("/result", {
 					state: { results, feedback: response.data, totalTime },

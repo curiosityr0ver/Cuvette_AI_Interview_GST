@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-const submitIntro = async (formData) => {
+const submitResume = async (formData) => {
     const SERVER_ORIGIN = import.meta.env.VITE_API_BASE_URL || '';
     try {
-        const response = await axios.post(`${SERVER_ORIGIN}/intro`, formData, {
+        const response = await axios.post(`${SERVER_ORIGIN}/intro/parse`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -15,5 +15,16 @@ const submitIntro = async (formData) => {
     }
 };
 
+const submitIntro = async (formData) => {
+    const SERVER_ORIGIN = import.meta.env.VITE_API_BASE_URL || '';
+    try {
+        const response = await axios.post(`${SERVER_ORIGIN}/intro/register`, formData);
+        return response;
+    } catch (error) {
+        console.error('Error submitting intro:', error);
+        return error;
+    }
+};
 
-export default submitIntro;
+
+export { submitResume, submitIntro };

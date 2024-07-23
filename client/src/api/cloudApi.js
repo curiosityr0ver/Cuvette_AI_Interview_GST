@@ -11,6 +11,6 @@ export const transcribeAudio = async (formData) => {
         return response.data;
     } catch (error) {
         console.error('Error transcribing audio:', error);
-        throw error;
+        return error;
     }
 };

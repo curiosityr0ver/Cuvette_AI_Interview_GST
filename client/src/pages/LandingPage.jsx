@@ -1,7 +1,17 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import styles from "./LandingPage.module.css";
-import submitIntro from "../api/submitIntro";
+import { submitResume, submitIntro } from "../api/submitIntro";
+import FormFields from "../components/FormFields";
+
+const defaultTechnologies = {
+	React: false,
+	Node: false,
+	SQL: false,
+	ExpressJS: false,
+	DevOps: false,
+	ML: false,
+	DataScience: false,
+};
 
 const LandingPage = () => {
 	const [formData, setFormData] = useState({
@@ -10,26 +20,78 @@ const LandingPage = () => {
 		fullName: "",
 		linkedin: "",
 		resume: null,
+		role: "",
+		experience: "",
+		technologies: defaultTechnologies,
 	});
 
 	const [error, setError] = useState("");
-
-	const navigate = useNavigate();
-
-	useEffect(() => {
-		const user = JSON.parse(localStorage.getItem("user"));
-		if (user) {
-			console.log(user);
-			setFormData(user);
-		}
-	}, []);
+	const [dragActive, setDragActive] = useState(false);
 
 	const handleChange = (e) => {
-		const { name, value, files } = e.target;
-		if (name === "resume") {
-			setFormData({ ...formData, resume: files[0] });
-		} else {
-			setFormData({ ...formData, [name]: value });
+		const { name, value } = e.target;
+		setFormData({ ...formData, [name]: value });
+	};
+
+	const handleCheckboxChange = (e) => {
+		const { name, checked } = e.target;
+		setFormData((prevState) => ({
+			...prevState,
+			technologies: {
+				...prevState.technologies,
+				[name]: checked,
+			},
+		}));
+	};
+
+	const handleFileChange = async (file) => {
+		setFormData({ ...formData, resume: file });
+		try {
+			const response = await submitResume({ resume: file });
+			console.log(response.data);
+
+			if (response.status === 201) {
+				const data = response.data;
+				setFormData((prevState) => ({
+					...prevState,
+					fullName: data.name || "",
+					email: data.email || "",
+					phone: data.phone || "",
+					linkedin: data.linkedin || "",
+					role: data.jobProfile || "",
+					experience: data.yearsOfFullTimeExperience?.toString() || "",
+					technologies: {
+						React: data.technologies.includes("React"),
+						Node: data.technologies.includes("Node"),
+						SQL: data.technologies.includes("SQL"),
+						ExpressJS: data.technologies.includes("ExpressJS"),
+						DevOps: data.technologies.includes("DevOps"),
+						ML: data.technologies.includes("ML"),
+						DataScience: data.technologies.includes("DataScience"),
+					},
+				}));
+			}
+		} catch (error) {
+			console.error("Error submitting resume:", error);
+		}
+	};
+
+	const handleDrag = (e) => {
+		e.preventDefault();
+		e.stopPropagation();
+		if (e.type === "dragenter" || e.type === "dragover") {
+			setDragActive(true);
+		} else if (e.type === "dragleave") {
+			setDragActive(false);
+		}
+	};
+
+	const handleDrop = (e) => {
+		e.preventDefault();
+		e.stopPropagation();
+		setDragActive(false);
+		if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+			handleFileChange(e.dataTransfer.files[0]);
 		}
 	};
 
@@ -39,11 +101,26 @@ const LandingPage = () => {
 			setError("Please provide either a LinkedIn profile or a resume.");
 		} else {
 			setError("");
-			const response = await submitIntro(formData);
-			if (response.status === 201) {
-				console.log(response.data);
-				localStorage.setItem("user", JSON.stringify(formData));
-				navigate("/quiz");
+			const dataToSubmit = {
+				email: formData.email,
+				phone: formData.phone,
+				fullName: formData.fullName,
+				linkedin: formData.linkedin,
+				technologies: Object.keys(formData.technologies).filter(
+					(tech) => formData.technologies[tech]
+				),
+				jobProfile: formData.role,
+				experience: formData.experience,
+			};
+			try {
+				const response = await submitIntro(dataToSubmit);
+				console.log(response);
+				if (response.status === 201) {
+					console.log(response.data);
+					// navigate("/quiz");
+				}
+			} catch (error) {
+				console.error("Error submitting intro:", error);
 			}
 		}
 	};
@@ -51,58 +128,37 @@ const LandingPage = () => {
 	return (
 		<div className={styles.container}>
 			<h1>Enter Your Details</h1>
-			<form onSubmit={handleSubmit} className={styles.form}>
+			<div
+				className={`${styles.dropzone} ${dragActive ? styles.active : ""}`}
+				onDragEnter={handleDrag}
+				onDragLeave={handleDrag}
+				onDragOver={handleDrag}
+				onDrop={handleDrop}
+				onClick={() => document.getElementById("fileUpload").click()}
+			>
 				<input
-					type="email"
-					name="email"
-					placeholder="Email"
-					value={formData.email}
-					onChange={handleChange}
-					required
-					className={styles.input}
+					type="file"
+					id="fileUpload"
+					name="resume"
+					accept="application/pdf"
+					onChange={(e) => handleFileChange(e.target.files[0])}
+					style={{ display: "none" }}
 				/>
-				<input
-					type="tel"
-					name="phone"
-					placeholder="Phone"
-					value={formData.phone}
-					onChange={handleChange}
-					required
-					className={styles.input}
-				/>
-				<input
-					type="text"
-					name="fullName"
-					placeholder="Full Name"
-					value={formData.fullName}
-					onChange={handleChange}
-					required
-					className={styles.input}
-				/>
-				<input
-					type="url"
-					name="linkedin"
-					placeholder="LinkedIn Profile"
-					value={formData.linkedin}
-					onChange={handleChange}
-					className={styles.input}
-				/>
-				<div className={styles.orSeparator}>OR</div>
-				<label className={styles.fileLabel}>
-					Upload Resume (PDF):
-					<input
-						type="file"
-						name="resume"
-						accept="application/pdf"
-						onChange={handleChange}
-						className={styles.inputFile}
-					/>
-				</label>
-				{error && <div className={styles.error}>{error}</div>}
-				<button type="submit" className={styles.submitButton}>
-					Submit
-				</button>
-			</form>
+				{formData.resume ? (
+					<p>{formData.resume.name}</p>
+				) : (
+					<p>Drag 'n' drop your resume here, or click to select a file</p>
+				)}
+			</div>
+			<FormFields
+				formData={formData}
+				handleChange={handleChange}
+				handleCheckboxChange={handleCheckboxChange}
+				error={error}
+			/>
+			<button onClick={handleSubmit} className={styles.submitButton}>
+				Submit
+			</button>
 			<footer className={styles.footer}>
 				<p>This application is in beta. Please be kind. 😊</p>
 			</footer>

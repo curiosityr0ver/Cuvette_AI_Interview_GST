@@ -5,8 +5,11 @@ const UserSchema = new mongoose.Schema({
     phone: { type: String, required: true },
     fullName: { type: String, required: true },
     linkedin: { type: String },
-    resume: { type: Buffer },
-    resumeContentType: { type: String }
+    technologies: { type: [String], required: true },
+    jobProfile: { type: String, required: true },
 });
+
+// technologies,
+// jobProfile
 
 module.exports = mongoose.model('User', UserSchema);
