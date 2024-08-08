@@ -19,6 +19,10 @@ mongoose.connect(process.env.MONGO_URI).then(() => {
 app.use(cors());
 app.use(express.json());
 
+app.get('/', (req, res) => {
+    res.send('Server running');
+});
+
 app.use('/intro', userRoute);
 app.use('/quiz', quizRoute);
 app.post('/cloud', upload.single('audio'), transcribeAudioHandler);
