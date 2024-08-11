@@ -47,7 +47,7 @@ const generateContent = async (invoice) => {
             messages: [
                 {
                     role: "system",
-                    content: "The following is an invoice. Only answer in JSON"
+                    content: "The following is an invoice. Only answer in JSON. Make sure you don't include taxes and charges in products. You can include them in the total_payable_amount."
                 },
                 {
                     role: "user",
