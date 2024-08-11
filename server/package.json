@@ -21,6 +21,10 @@
     "nodemon": "^3.1.4",
     "path": "^0.12.7",
     "pdf-parse": "^1.1.1",
-    "wav-file-info": "^0.0.10"
+    "pdf2json": "^3.1.4",
+    "together-ai": "^0.6.0-alpha.4",
+    "wav-file-info": "^0.0.10",
+    "zod": "^3.23.8",
+    "zod-to-json-schema": "^3.23.2"
   }
 }

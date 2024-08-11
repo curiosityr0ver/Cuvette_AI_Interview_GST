@@ -2,8 +2,7 @@ const express = require("express");
 const cors = require('cors');
 require('dotenv').config();
 const path = require("path");
-const userRoute = require('./controllers/userRoute');
-const quizRoute = require('./controllers/quizRoute');
+const invoiceRoute = require('./controllers/invoiceRoute');
 const { transcribeAudioHandler, upload } = require('./controllers/transcribeController');
 const mongoose = require('mongoose');
 
@@ -23,11 +22,7 @@ app.get('/', (req, res) => {
     res.send('Server running');
 });
 
-app.use('/intro', userRoute);
-app.use('/quiz', quizRoute);
-app.post('/cloud', upload.single('audio'), transcribeAudioHandler);
-
-
+app.use('/invoice', invoiceRoute);
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('*', (req, res) => {

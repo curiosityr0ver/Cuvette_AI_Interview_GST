@@ -14,6 +14,7 @@ const generateContent = async (...args) => {
 
     try {
         const result = await model.generateContent(args);
+        console.log(result.response);
         const response = result.response.text();
         return JSON.parse(response);
     } catch (error) {
